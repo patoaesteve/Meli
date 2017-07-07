@@ -1,0 +1,186 @@
+<style>
+$bkg:     #1a1a1a;
+$cBkg:    #262626;
+$pTxt:    #d5ff80;
+$hTxt:    #88cc00;
+
+body {
+    background-color: $bkg;
+    color: $pTxt;
+}
+
+canvas {
+    background-color: $cBkg;
+    border: 1px solid;
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin:auto
+}
+
+.wrapper {
+    width: 100%;
+}
+</style>
+
+<div id="canvasSettings"></div>
+<div class="wrapper">
+    <canvas id="canvas" width="400" height="400"></canvas>
+</div>
+
+<script>
+
+// Global canvas variables
+var canvas      = document.getElementById('canvas');
+var settingsEl = document.getElementById('canvasSettings');
+var ctx         = canvas.getContext('2d');
+var setWidth    = 400;
+var setHeight   = 400;
+var checMath    = (400/2)+5; // Making sure my order of operations is correct
+
+// Temporary controls for managing the canvas dimension
+canvas.setAttribute('width', setWidth);
+canvas.setAttribute('height', setHeight);
+
+// Retrieve the current canvas element dimensions
+var ctxWidth    = canvas.getAttribute('width');
+var ctxHeight   = canvas.getAttribute('height');
+
+// Muevo el 0,0 al centro. 
+ctx.translate(canvas.width/2,canvas.height/2);
+
+/* 
+The following four functions draw a basic Cartesian 
+at a constant canvas dimension. This will change.
+*/
+
+/*
+This function draws the x-axis to the context
+parameter height, and width can be used to set
+the draw distance for the axis lines.
+*/
+function drawXaxis(width, height) {
+    ctx.beginPath();
+    ctx.moveTo(0,height);
+    ctx.lineTo(width, height);
+    ctx.stroke();
+}
+
+// Rewrite to handle variable dimensions.
+function drawXscale(width, scale) {
+    // Accumulator
+    var unitScale = 0;
+    
+    // Render loop
+    for (var i = 0; i < (width/scale); i++) {
+        unitScale += scale;
+        // Condition to check if scale is out of bounds leave scope if true?
+        if (unitScale == (width) || unitScale == width) {
+            continue;
+        }
+        // Render commands
+        ctx.beginPath();
+        ctx.moveTo(unitScale,(width)+4);
+        ctx.lineTo(unitScale,(width)-4);
+        ctx.stroke();
+    }
+    // Condition to check scale size to prevent overdraw?
+    if (unitScale >= width) {
+        unitScale = 0;
+    }
+}
+
+
+/*
+This function draws the x-axis to the context
+parameter height, and width can be used to set
+the draw distance for the axis lines.
+*/
+function drawYaxis(width, height) {
+    ctx.beginPath();
+    ctx.moveTo(width/2,0);
+    ctx.lineTo(width/2,height);
+    ctx.stroke();
+}
+
+
+function drawYscale() {
+    var unitScale = 0;
+    for (var i = 0; i < 8; i++) {
+        unitScale += 32;
+        if (unitScale == 128 || unitScale == 256) {
+            continue;
+        }
+        ctx.beginPath();
+        ctx.moveTo(132,unitScale);
+        ctx.lineTo(124,unitScale);
+        ctx.stroke();
+    }
+    if (unitScale >= 256) {
+        unitScale = 0;
+    }
+}
+
+// Fit scale to dimensional ratio
+function fitScale(inScale) {
+    return Math.round(inScale/8) * 8;
+}
+
+function drawZero() {
+	// draw a dot at the new origin
+	ctx.fillStyle = "#F00";
+	ctx.beginPath();
+	ctx.arc(0,0,5,0,Math.PI*2);
+	ctx.closePath();
+	ctx.fill();
+	ctx.textAlign='center';
+	ctx.fillText('[ 0, 0 ]',0,-10);
+}
+
+function drawPoint(p) {
+    ctx.fillStyle = "#F00";
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
+    ctx.fill();
+}
+
+function drawTriangle(p0, p1, p2) {
+
+    ctx.fillStyle = "#999";
+    ctx.beginPath();
+    ctx.moveTo(p0.x, p0.y);
+    ctx.lineTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#000";
+    ctx.font = "12px monospace";
+    ctx.fillText("Vulcano [x:" + p0.x + ", y:" + -1*p0.y + "]", p0.x, p0.y);
+    ctx.fillText("Fergei [x:" + p1.x + ", y:" + -1*p1.y + "]", p1.x, p1.y);
+    ctx.fillText("Betasoide [x:" + p2.x + ", y:" + -1*p2.y + "]", p2.x, p2.y);
+}
+
+var triangle = triangle();
+function triangle() {
+	var escala = 10;
+    return {
+        a: { x: 707/escala, y: -1*-707/escala },
+        b: { x: 353/escala, y: -1*353/escala},
+        c: { x: 1414/escala, y: -1*-1414/escala },
+		d: { x: 100, y: -1*100 },
+    };
+}
+// function calls
+drawXaxis(ctxWidth, ctxHeight);
+drawXscale(ctxWidth,8);
+drawYaxis(ctxWidth, ctxHeight);
+//drawYscale();
+drawZero();
+/*drawPoint(triangle.a);
+drawPoint(triangle.b);
+drawPoint(triangle.c);
+drawPoint(triangle.d);*/
+drawTriangle(triangle.a, triangle.b, triangle.c);
+</script>
